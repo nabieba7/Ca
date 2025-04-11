@@ -1,49 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Parallax Music Player</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <link rel="stylesheet" href="./styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Music Player</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <div class="wrapper">
     <div class="top-bar">
-      <i class="material-icons">expand_more</i>
+      <i class="material-icons" id="show-list">queue_music</i>
       <span>Now Playing</span>
-      <i class="material-icons">more_vert</i>
+      <i class="material-icons" id="upload-btn">file_upload</i>
     </div>
 
     <div class="img-area">
-      <img src="/src/assets/images/img-1.jpg" alt="Album Artwork" />
+      <img id="album-art" src="https://source.unsplash.com/random/300x300/?music,album" alt="Album Artwork">
     </div>
 
     <div class="song-details">
-      <p class="name">Song Name</p>
-      <p class="artist">Artist Name</p>
+      <p class="name" id="song-title">No song selected</p>
+      <p class="artist" id="song-artist">Select a song</p>
     </div>
 
     <div class="progress-area">
       <div class="progress-bar">
-        <span></span>
+        <span id="progress"></span>
       </div>
       <div class="timer">
-        <span class="current-time">0:00</span>
-        <span class="max-duration">0:00</span>
+        <span class="current-time" id="current-time">0:00</span>
+        <span class="max-duration" id="duration">0:00</span>
       </div>
     </div>
 
     <div class="controls">
-      <i id="repeat-plist" class="material-icons" title="Repeat">repeat</i>
+      <i id="repeat" class="material-icons" title="Repeat">repeat</i>
       <i id="prev" class="material-icons" title="Previous">skip_previous</i>
       <i id="play" class="material-icons" title="Play">play_arrow</i>
       <i id="next" class="material-icons" title="Next">skip_next</i>
       <i id="shuffle" class="material-icons" title="Shuffle">shuffle</i>
-      <audio id="main-audio"></audio>
     </div>
 
-    <div class="music-list">
+    <div class="music-list" id="playlist">
       <div class="header">
         <div class="row">
           <i class="material-icons">queue_music</i>
@@ -52,14 +51,19 @@
         <i id="close" class="material-icons">close</i>
       </div>
 
-      <ul>
-        <!-- Playlist items will be populated by JavaScript -->
+      <ul id="playlist-items">
+        <!-- Playlist items will be added here -->
       </ul>
     </div>
-    
 
+    <!-- Hidden file inputs -->
+    <input type="file" id="audio-upload" accept="audio/*" style="display: none;">
+    <input type="file" id="image-upload" accept="image/*" style="display: none;">
+    
+    <!-- Audio element -->
+    <audio id="audio-player"></audio>
   </div>
-<script src="/main.js"></script>
+
   <script src="./script.js"></script>
 </body>
 </html>

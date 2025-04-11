@@ -11,5 +11,8 @@
   "description": "",
   "devDependencies": {
     "electron": "^35.1.5"
+  },
+  "dependencies": {
+    "music-metadata": "^11.1.1"
   }
 }
