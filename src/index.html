@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Parallax Music Player</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="wrapper">
     <div class="top-bar">
       <i class="material-icons">expand_more</i>
       <span>Now Playing</span>
-      <i class="material-icons">expand_less</i>
+      <i class="material-icons">more_vert</i>
     </div>
 
     <div class="img-area">
-      <img src="/assets/images/israel-palacio-Y20JJ_ddy9M-unsplash.jpg" alt="Cover Art" />
+      <img src="/src/assets/images/img-1.jpg" alt="Album Artwork" />
     </div>
 
     <div class="song-details">
-      <p class="name">Beauz £ jdlk - Crazy</p>
-      <p class="artist">rfij jefn</p>
+      <p class="name">Song Name</p>
+      <p class="artist">Artist Name</p>
     </div>
 
     <div class="progress-area">
@@ -29,17 +29,18 @@
         <span></span>
       </div>
       <div class="timer">
-        <span class="current">0:20</span>
-        <span class="duration">3:40</span>
+        <span class="current-time">0:00</span>
+        <span class="max-duration">0:00</span>
       </div>
     </div>
 
     <div class="controls">
-      <i id="repeat-plist" class="material-icons">repeat</i>
-      <i id="prev" class="material-icons">skip_previous</i>
-      <i id="play" class="material-icons">play_arrow</i>
-      <i id="next" class="material-icons">skip_next</i>
-      <i id="shuffle" class="material-icons">shuffle</i>
+      <i id="repeat-plist" class="material-icons" title="Repeat">repeat</i>
+      <i id="prev" class="material-icons" title="Previous">skip_previous</i>
+      <i id="play" class="material-icons" title="Play">play_arrow</i>
+      <i id="next" class="material-icons" title="Next">skip_next</i>
+      <i id="shuffle" class="material-icons" title="Shuffle">shuffle</i>
+      <audio id="main-audio"></audio>
     </div>
 
     <div class="music-list">
@@ -52,51 +53,13 @@
       </div>
 
       <ul>
-        <li>
-          <div class="row">
-            <span>Ikson Anywhere - Icson</span>
-            <p>Audio Library</p>
-          </div>
-          <span class="auto-duration">3:30</span>
-        </li>
-        <li>
-          <div class="row">
-            <span>Ikson Anywhere - Icson</span>
-            <p>Audio Library</p>
-          </div>
-          <span class="auto-duration">3:30</span>
-        </li>
-        <li>
-          <div class="row">
-            <span>Ikson Anywhere - Icson</span>
-            <p>Audio Library</p>
-          </div>
-          <span class="auto-duration">3:30</span>
-        </li>
-        <li>
-          <div class="row">
-            <span>Ikson Anywhere - Icson</span>
-            <p>Audio Library</p>
-          </div>
-          <span class="auto-duration">3:30</span>
-        </li>
-        <li>
-          <div class="row">
-            <span>Ikson Anywhere - Icson</span>
-            <p>Audio Library</p>
-          </div>
-          <span class="auto-duration">3:30</span>
-        </li>
-        <li>
-          <div class="row">
-            <span>Ikson Anywhere - Icson</span>
-            <p>Audio Library</p>
-          </div>
-          <span class="auto-duration">3:30</span>
-        </li>
+        <!-- Playlist items will be populated by JavaScript -->
       </ul>
     </div>
+    
+
   </div>
+<script src="/main.js"></script>
   <script src="./script.js"></script>
 </body>
 </html>

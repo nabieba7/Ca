@@ -1,3 +1,4 @@
+/* Your existing CSS content here */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
 * {
@@ -28,7 +29,7 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #f9f9f9;
+  background: transparent;
 }
 
 .wrapper {
@@ -185,7 +186,6 @@ body {
   bottom: -55%;
   opacity: 0;
   pointer-events: none;
-
   width: 100%;
   padding: 15px 30px;
   border-radius: 15px;
@@ -193,11 +193,13 @@ body {
   box-shadow: 0px -5px 10px rgba(0, 0, 0, 0.1);
   transition: all 0.14s ease-out;
 }
-.music-list.show{
+
+.music-list.show {
   bottom: 0;
   opacity: 1;
   pointer-events: auto;
 }
+
 .music-list .header .row {
   display: flex;
   align-items: center;
@@ -233,5 +235,52 @@ body {
   list-style: none;
   padding: 10px 0;
   margin-bottom: 5px;
-  border-bottom: 1px
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.music-list ul li:hover {
+  color: var(--violet);
+}
+
+.music-list ul li.playing {
+  color: var(--pink);
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .controls i {
+    font-size: 24px;
+  }
+
+  .song-details .name {
+    font-size: 18px;
+  }
+}
+
+.music-list ul::-webkit-scrollbar {
+  width: 8px;
+}
+
+.music-list ul::-webkit-scrollbar-thumb {
+  background: var(--violet);
+  border-radius: 5px;
+}
+
+.music-list ul::-webkit-scrollbar-track {
+  background: var(--barkwhite);
+}
+
+#play {
+  transition: all 0.3s ease, transform 0.2s ease;
+}
+
+#play.playing {
+  transform: rotate(90deg);
 }
