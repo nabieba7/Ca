@@ -1,5 +1,8 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  selectFolder: () => ipcRenderer.invoke('select-folder')
-});
+  loadSongs: () => ipcRenderer.invoke('loadSongs'),
+  saveSongs: (songs) => ipcRenderer.invoke('saveSongs', songs),
+  showOpenDialog: (options) => ipcRenderer.invoke('dialog:openFile', options),
+  getAppPath: () => ipcRenderer.invoke('getAppPath')
+})

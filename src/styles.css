@@ -14,13 +14,13 @@
 }
 
 .dark-theme {
-  --primary: #4cc9f0;
-  --secondary: #4895ef;
-  --text: #f8f9fa;
-  --bg: #121212;
-  --card: #1e1e1e;
-  --shadow: rgba(0, 0, 0, 0.3);
-  --progress-bg: #333;
+  --primary: #88c070;        /* soft green highlight */
+  --secondary: #a3d9a5;      /* light leafy green */
+  --text: #eafbe7;           /* light minty white-green for readability */
+  --bg: #0d1a0d;             /* deep forest green background */
+  --card: #1c2b1c;           /* slightly lighter for cards */
+  --shadow: rgba(0, 0, 0, 0.4);  /* slightly stronger for depth */
+  --progress-bg: #2e4e2e;    /* muted green for progress bar background */
 }
 
 * {
@@ -36,14 +36,15 @@ body {
   justify-content: center;
   min-height: 100vh;
   background: var(--bg);
-  color: var(--text);
+  color: black;
   transition: background 0.3s ease;
+  background-image: url(./assets/img/layer-1.jpg);
 }
 
 .wrapper {
   width: 380px;
   border-radius: 15px;
-  background: var(--card);
+  background: rgba(45, 85, 55, 0.5);
   padding: 25px 30px;
   box-shadow: 0 6px 15px var(--shadow);
   position: relative;
@@ -59,7 +60,7 @@ body {
 .top-bar i {
   font-size: 24px;
   cursor: pointer;
-  color: var(--text);
+  color: rgba(57, 255, 20, 0.5);
 }
 
 .top-bar span {
@@ -68,12 +69,13 @@ body {
 }
 
 .img-area {
+  position: relative; /* Needed for ::after */
+  width: 256px;
   height: 256px;
-  width: 100%;
-  margin: 25px 0;
+  margin: 25px auto;
   overflow: hidden;
-  border-radius: 15px;
-  box-shadow: 0 6px 12px var(--shadow);
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
 }
 
 .img-area img {
@@ -81,7 +83,33 @@ body {
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  border-radius: 50%;
+  animation: spin 6s linear infinite;
 }
+
+.img-area::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  background-color: #111;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  box-shadow: inset 0 0 5px #000;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 .song-details {
   text-align: center;
@@ -102,17 +130,26 @@ body {
 .progress-area {
   height: 6px;
   width: 100%;
-  background: var(--progress-bg);
+  background: #2e4e2e; /* Track color */
   border-radius: 50px;
   cursor: pointer;
+  position: relative;
+  margin: 15px 0;
 }
 
 .progress-bar {
   height: 100%;
-  width: 0%;
-  background: var(--progress-fill);
-  border-radius: inherit;
+  width: 100%; /* Full width of parent */
   position: relative;
+  border-radius: inherit;
+}
+
+#progress {
+  display: block;
+  height: 100%;
+  width: 0%; /* Starts at 0 */
+  background: linear-gradient(to right, #4CAF50, #8BC34A); /* Green gradient */
+  border-radius: inherit;
   transition: width 0.1s linear;
 }
 
@@ -130,12 +167,12 @@ body {
 .controls i {
   font-size: 28px;
   cursor: pointer;
-  color: var(--text);
+  color: yellowgreen;
   transition: transform 0.2s ease;
 }
 
 .controls i:hover {
-  color: var(--primary);
+  color: green;
   transform: scale(1.1);
 }
 
@@ -145,8 +182,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary);
-  color: white;
+  background:#0DF718 ;
+  color: black;
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(67, 97, 238, 0.3);
 }
@@ -156,7 +193,7 @@ body {
   left: 0;
   bottom: -100%;
   width: 100%;
-  background: var(--card);
+  background: green;
   border-radius: 15px;
   padding: 15px 20px;
   box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.1);
@@ -188,12 +225,12 @@ body {
 }
 
 .music-list ul::-webkit-scrollbar-track {
-  background: var(--progress-bg);
+  background: yellow;
   border-radius: 3px;
 }
 
 .music-list ul::-webkit-scrollbar-thumb {
-  background: var(--primary);
+  background: softgreen;
   border-radius: 3px;
 }
 
@@ -254,8 +291,8 @@ body {
   justify-content: center;
   padding: 10px;
   margin-top: 10px;
-  background: var(--primary);
-  color: white;
+  background: #A6D3BC;
+  color: #0C1001;
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s ease;
@@ -288,4 +325,36 @@ body {
     height: 50px;
     width: 50px;
   }
+}
+.volume-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.volume-bar {
+  height: 4px;
+  width: 80px;
+  background: #2e4e2e;
+  border-radius: 50px;
+  cursor: pointer;
+  position: relative;
+}
+
+.volume-progress {
+  height: 100%;
+  width: 100%; /* Default to full volume */
+  background: linear-gradient(to right, #4CAF50, #8BC34A);
+  border-radius: inherit;
+  transition: width 0.1s linear;
+}
+
+#mute-btn {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#mute-btn:hover {
+  color: var(--primary);
 }

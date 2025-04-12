@@ -41,6 +41,12 @@
       <i id="next" class="material-icons" title="Next">skip_next</i>
       <i id="shuffle" class="material-icons" title="Shuffle">shuffle</i>
     </div>
+    <div class="volume-controls">
+      <i id="mute-btn" class="material-icons" title="Mute">volume_up</i>
+      <div class="volume-bar">
+        <div class="volume-progress" id="volume-progress"></div>
+      </div>
+    </div>
 
     <div class="music-list" id="playlist">
       <div class="header">
@@ -65,5 +71,10 @@
   </div>
 
   <script src="./script.js"></script>
+  <script>
+    window.addEventListener('beforeunload', () => {
+      window.electronAPI.saveSongs()
+    })
+  </script>
 </body>
 </html>
