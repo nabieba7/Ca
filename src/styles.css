@@ -12,10 +12,17 @@
   --progress-bg: #ddd;
   --progress-fill: var(--primary);
 }
+ layer-4 {
+  transform: translateZ(300px) scale(.7);
+ }
+ .layer-2 {
+	transform: translateZ(80px) scale(.88);
+  background-image: url('./assets/img/layer-2.jpg');  
 
+ }
 .dark-theme {
-  --primary: black;        
-  --secondary: #a3d9a5;     
+  --primary: #88c070;        /* soft green highlight */
+  --secondary: #a3d9a5;      /* light leafy green */
   --text: #eafbe7;           /* light minty white-green for readability */
   --bg: #0d1a0d;             /* deep forest green background */
   --card: #1c2b1c;           /* slightly lighter for cards */

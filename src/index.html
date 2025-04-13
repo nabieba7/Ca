@@ -6,8 +6,13 @@
   <title>Advanced Music Player</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="./styles.css">
+  <script src="./libs/rain.js" defer></script>
 </head>
 <body>
+  <div class="layers__item layer-2" ></div>
+  <div class="layers__item layer-4">
+    <canvas class="rain"></canvas>
+  </div>
   <div class="wrapper">
     <div class="top-bar">
       <i class="material-icons" id="show-list">queue_music</i>
@@ -68,6 +73,7 @@
     
     <!-- Audio element -->
     <audio id="audio-player"></audio>
+   
   </div>
 
   <script src="./script.js"></script>
