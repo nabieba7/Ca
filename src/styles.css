@@ -1,35 +1,32 @@
-/* styles.css - with added styles for new features */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+/* styles.css - Complete Enhanced Music Player Styles */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary: #4361ee;
-  --secondary: #3f37c9;
-  --accent: #4cc9f0;
-  --text: #333;
+  --primary: #355E3B;
+  --secondary: darkgreen  ;
+  --accent: #808000;
+  --text: #C4B454;
   --bg: #f8f9fa;
-  --card: #fff;
+  --card: #1c2b1c;
   --shadow: rgba(0, 0, 0, 0.1);
   --progress-bg: #ddd;
   --progress-fill: var(--primary);
+  --error: #ff4444;
+  --success: #00c851;
 }
- layer-4 {
-  transform: translateZ(300px) scale(.7);
- }
- .layer-2 {
-	transform: translateZ(80px) scale(.88);
-  background-image: url('./assets/img/layer-2.jpg');  
 
- }
 .dark-theme {
-  --primary: #88c070;        /* soft green highlight */
-  --secondary: #a3d9a5;      /* light leafy green */
-  --text: #eafbe7;           /* light minty white-green for readability */
-  --bg: #0d1a0d;             /* deep forest green background */
-  --card: #1c2b1c;           /* slightly lighter for cards */
-  --shadow: rgba(0, 0, 0, 0.4);  /* slightly stronger for depth */
-  --progress-bg: #2e4e2e;    /* muted green for progress bar background */
+  --primary: #88c070;
+  --secondary: #a3d9a5;
+  --text: #eafbe7;
+  --bg: #0d1a0d;
+  --card: #1c2b1c;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --progress-bg: #2e4e2e;
+  --accent: #5de0c6;
 }
 
+/* Base Styles */
 * {
   margin: 0;
   padding: 0;
@@ -43,55 +40,122 @@ body {
   justify-content: center;
   min-height: 100vh;
   background: var(--bg);
-  color: black;
-  transition: background 0.3s ease;
+  color: var(--text);
+  transition: all 0.3s ease;
   background-image: url(./assets/img/layer-1.jpg);
+  background-size: cover;
+  background-position: center;
 }
 
+/* Background Layers */
+.layers__item {
+  position: fixed;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  will-change: transform;
+  z-index: -1;
+}
+
+.layer-2 {
+  transform: translateZ(80px) scale(0.88);
+  background-image: url('./assets/img/layer-2.jpg');
+  opacity: 0.8;
+}
+
+.layer-4 {
+  transform: translateZ(300px) scale(0.7);
+}
+
+.layer-4 canvas.rain {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+/* Main Player Container */
 .wrapper {
   width: 380px;
   border-radius: 15px;
   background: rgba(45, 85, 55, 0.5);
+  backdrop-filter: blur(10px);
   padding: 25px 30px;
   box-shadow: 0 6px 15px var(--shadow);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-.top-bar, .progress-area .timer, .controls, .music-list .header {
+/* Theme Toggle */
+.theme-toggle {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+  z-index: 10;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.2);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  left: 10px;
+}
+
+.theme-toggle:hover {
+  background: rgba(0, 0, 0, 0.3);
+  transform: scale(1.1);
+}
+
+/* Top Bar */
+.top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 40px; /* Give room for theme toggle on the left */
+  margin-top: 40px; /* Push down to avoid overlap */
 }
+
 
 .top-bar i {
   font-size: 24px;
   cursor: pointer;
-  color: rgba(57, 255, 20, 0.5);
+  color: rgba(57, 255, 20, 0.7);
+  transition: all 0.2s ease;
+}
+
+.top-bar i:hover {
+  color: var(--accent);
+  transform: scale(1.1);
 }
 
 .top-bar span {
   font-size: 18px;
   font-weight: 500;
+  color: var(--text);
 }
 
+/* Album Art */
 .img-area {
-  position: relative; /* Needed for ::after */
+  position: relative;
   width: 256px;
   height: 256px;
   margin: 25px auto;
   overflow: hidden;
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
 }
 
 .img-area img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
   border-radius: 50%;
-  animation: spin 6s linear infinite;
 }
 
 .img-area::after {
@@ -108,16 +172,7 @@ body {
   box-shadow: inset 0 0 5px #000;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
+/* Song Details */
 .song-details {
   text-align: center;
   margin: 20px 0;
@@ -127,17 +182,20 @@ body {
   font-size: 21px;
   font-weight: 600;
   margin-bottom: 5px;
+  color: var(--text);
 }
 
 .song-details .artist {
   font-size: 16px;
   opacity: 0.8;
+  color: var(--text);
 }
 
+/* Progress Bar */
 .progress-area {
   height: 6px;
   width: 100%;
-  background: #2e4e2e; /* Track color */
+  background: var(--progress-bg);
   border-radius: 50px;
   cursor: pointer;
   position: relative;
@@ -146,7 +204,7 @@ body {
 
 .progress-bar {
   height: 100%;
-  width: 100%; /* Full width of parent */
+  width: 100%;
   position: relative;
   border-radius: inherit;
 }
@@ -154,8 +212,8 @@ body {
 #progress {
   display: block;
   height: 100%;
-  width: 0%; /* Starts at 0 */
-  background: linear-gradient(to right, #4CAF50, #8BC34A); /* Green gradient */
+  width: 0%;
+  background: linear-gradient(to right, var(--primary), var(--accent));
   border-radius: inherit;
   transition: width 0.1s linear;
 }
@@ -165,22 +223,31 @@ body {
   font-size: 14px;
   display: flex;
   justify-content: space-between;
+  color: var(--text);
 }
 
+/* Controls */
 .controls {
   margin: 30px 0 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .controls i {
   font-size: 28px;
   cursor: pointer;
-  color: yellowgreen;
-  transition: transform 0.2s ease;
+  color: var(--text);
+  transition: all 0.2s ease;
 }
 
 .controls i:hover {
-  color: green;
+  color: var(--primary);
   transform: scale(1.1);
+}
+
+.controls i.active {
+  color: var(--primary);
 }
 
 .controls #play {
@@ -189,23 +256,69 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background:#0DF718 ;
-  color: black;
+  background: var(--primary);
+  color: white;
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(67, 97, 238, 0.3);
+  transition: all 0.2s ease;
 }
 
+.controls #play:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(67, 97, 238, 0.5);
+}
+
+/* Volume Controls */
+.volume-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.volume-bar {
+  height: 4px;
+  flex: 1;
+  background: var(--progress-bg);
+  border-radius: 50px;
+  cursor: pointer;
+  position: relative;
+}
+
+.volume-progress {
+  height: 100%;
+  width: 70%;
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  border-radius: inherit;
+  transition: width 0.1s linear;
+}
+
+#mute-btn {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text);
+}
+
+#mute-btn:hover {
+  color: var(--primary);
+}
+
+/* Playlist */
 .music-list {
   position: absolute;
   left: 0;
   bottom: -100%;
   width: 100%;
-  background: green;
-  border-radius: 15px;
+  background: var(--card);
+  border-radius: 15px 15px 0 0;
   padding: 15px 20px;
-  box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -5px 10px var(--shadow);
   transition: all 0.3s ease;
   z-index: 5;
+  max-height: 70vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .music-list.show {
@@ -213,18 +326,23 @@ body {
 }
 
 .music-list .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 15px;
 }
 
 .music-list .header i {
   font-size: 22px;
   cursor: pointer;
+  color: var(--text);
 }
 
 .music-list ul {
-  max-height: 260px;
+  flex: 1;
   overflow-y: auto;
   margin: 10px 0;
+  scrollbar-width: thin;
 }
 
 .music-list ul::-webkit-scrollbar {
@@ -232,12 +350,12 @@ body {
 }
 
 .music-list ul::-webkit-scrollbar-track {
-  background: yellow;
+  background: var(--progress-bg);
   border-radius: 3px;
 }
 
 .music-list ul::-webkit-scrollbar-thumb {
-  background: softgreen;
+  background: var(--primary);
   border-radius: 3px;
 }
 
@@ -249,6 +367,7 @@ body {
   cursor: pointer;
   display: flex;
   align-items: center;
+  transition: all 0.2s ease;
 }
 
 .music-list li:last-child {
@@ -261,6 +380,7 @@ body {
 
 .music-list li.playing {
   color: var(--primary);
+  background: rgba(67, 97, 238, 0.1);
   font-weight: 600;
 }
 
@@ -274,14 +394,69 @@ body {
 
 .music-list li .playlist-info {
   flex: 1;
+  overflow: hidden;
+}
+
+.music-list li .playlist-info strong {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .music-list li .playlist-info p {
   font-size: 14px;
   opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Animation for rotating album art */
+.music-list li .playlist-actions {
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.music-list li:hover .playlist-actions {
+  opacity: 1;
+}
+
+.remove-btn {
+  color: var(--error);
+  cursor: pointer;
+  padding: 8px;
+  transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Add Song Button */
+.add-song {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  margin-top: 10px;
+  background: rgba(67, 97, 238, 0.1);
+  color: var(--primary);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px dashed var(--primary);
+}
+
+.add-song:hover {
+  background: rgba(67, 97, 238, 0.2);
+}
+
+.add-song i {
+  margin-right: 8px;
+}
+
+/* Animations */
 @keyframes rotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -291,36 +466,66 @@ body {
   animation: rotate 20s linear infinite;
 }
 
-/* Add song button */
-.add-song {
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Notification */
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card);
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--shadow);
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 10px;
-  margin-top: 10px;
-  background: #A6D3BC;
-  color: #0C1001;
+  gap: 15px;
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s ease;
+  max-width: 300px;
+}
+
+.notification.show {
+  opacity: 1;
+  bottom: 30px;
+}
+
+.notification img {
+  width: 40px;
+  height: 40px;
   border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.3s ease;
+  object-fit: cover;
 }
 
-.add-song:hover {
-  background: var(--secondary);
+.notification-text {
+  flex: 1;
 }
 
-.add-song i {
-  margin-right: 8px;
+.notification-text strong {
+  display: block;
+  margin-bottom: 2px;
 }
 
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 450px) {
   .wrapper {
-    width: 90%;
+    width: 95%;
     padding: 20px;
+    border-radius: 10px;
   }
   
   .img-area {
+    width: 220px;
     height: 220px;
   }
   
@@ -332,36 +537,25 @@ body {
     height: 50px;
     width: 50px;
   }
-}
-.volume-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
+  
+  .music-list {
+    padding: 12px 15px;
+  }
 }
 
-.volume-bar {
-  height: 4px;
-  width: 80px;
-  background: #2e4e2e;
-  border-radius: 50px;
-  cursor: pointer;
-  position: relative;
+/* Error State */
+.error {
+  color: var(--error);
+  animation: shake 0.5s;
 }
 
-.volume-progress {
-  height: 100%;
-  width: 100%; /* Default to full volume */
-  background: linear-gradient(to right, #4CAF50, #8BC34A);
-  border-radius: inherit;
-  transition: width 0.1s linear;
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
 }
 
-#mute-btn {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-#mute-btn:hover {
-  color: var(--primary);
+/* Success State */
+.success {
+  color: var(--success);
 }
