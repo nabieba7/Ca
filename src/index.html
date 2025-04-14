@@ -14,7 +14,8 @@
     <canvas class="rain"></canvas>
   </div>
   <div class="wrapper">
-    <!-- Theme toggle button added -->
+    
+    <!-- Theme toggle button -->
     <div class="theme-toggle">
       <i class="material-icons">brightness_4</i>
     </div>
@@ -59,7 +60,7 @@
       </div>
     </div>
 
-    <!-- Enhanced playlist with action buttons -->
+    <!-- Playlist section -->
     <div class="music-list" id="playlist">
       <div class="header">
         <div class="row">
@@ -85,9 +86,7 @@
     <!-- Audio element -->
     <audio id="audio-player"></audio>
     
-    
-  </div>
-
+   <div class="notification" id="notification"></div>
   <script src="./script.js"></script>
   <script>
     // Save songs before window closes
@@ -96,8 +95,6 @@
         window.electronAPI.saveSongs();
       }
     });
-    
-    
   </script>
 </body>
 </html>

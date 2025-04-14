@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const muteBtn = document.getElementById('mute-btn');
     const volumeProgress = document.getElementById('volume-progress');
     const volumeBar = document.querySelector('.volume-bar');
-    const themeToggle = document.querySelector('.theme-toggle'); // Theme toggle button
+    const themeToggle = document.querySelector('.theme-toggle');
 
     // Player state
     let currentSongIndex = 0;
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         },
         join: (...args) => args.join('/')
-    } : { // Mock 'path' for browser environment
+    } : {
         basename: (p) => p.split('/').pop(),
         parse: (p) => {
             const ext = p.lastIndexOf('.') > 0 ? p.slice(p.lastIndexOf('.')) : '';
@@ -55,13 +55,42 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initPlayer() {
         try {
             songs = window.electronAPI ? await window.electronAPI.loadSongs() : loadSongsFromStorage();
-            if (songs.length > 0 && !audioPlayer.src) { // Ensure a song is loaded on init if available
+            if (songs.length > 0 && !audioPlayer.src) {
                 loadSong(currentSongIndex);
             }
             renderPlaylist();
-            initTheme(); // Initialize theme
+            initTheme();
+            
+            // Initialize media session if available
+            initMediaSession();
         } catch (err) {
             console.error('Failed to initialize player:', err);
+        }
+    }
+
+    // Initialize Media Session API
+    function initMediaSession() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', playSong);
+            navigator.mediaSession.setActionHandler('pause', pauseSong);
+            navigator.mediaSession.setActionHandler('previoustrack', prevSong);
+            navigator.mediaSession.setActionHandler('nexttrack', nextSong);
+            
+            updateMediaMetadata();
+        }
+    }
+
+    // Update media metadata
+    function updateMediaMetadata() {
+        if ('mediaSession' in navigator && songs[currentSongIndex]) {
+            const song = songs[currentSongIndex];
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title || 'Unknown Song',
+                artist: song.artist || 'Unknown Artist',
+                artwork: [
+                    { src: song.imageUrl || defaultImageUrl, sizes: '300x300', type: 'image/png' }
+                ]
+            });
         }
     }
 
@@ -107,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load song
     function loadSong(index) {
         if (songs.length === 0 || index < 0 || index >= songs.length) {
-            resetPlayer(); // Reset player if index is invalid
+            resetPlayer();
             return;
         }
 
@@ -128,6 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
         audioPlayer.onloadedmetadata = () => {
             durationEl.textContent = formatTime(audioPlayer.duration);
             if (isPlaying) audioPlayer.play().catch(e => console.error('Playback failed:', e));
+            
+            // Update taskbar progress (Electron)
+            if (window.electronAPI) {
+                window.electronAPI.setProgressBar(audioPlayer.currentTime / audioPlayer.duration);
+            }
         };
 
         audioPlayer.onerror = () => {
@@ -141,6 +175,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderPlaylist();
             }
         };
+
+        // Update notifications and metadata
+        updateMediaMetadata();
+        showNowPlayingNotification(song);
+        
+        // Update system tray (Electron)
+        if (window.electronAPI) {
+            window.electronAPI.updateTrayMenu({
+                isPlaying,
+                title: song.title || 'Unknown Song',
+                artist: song.artist || 'Unknown Artist'
+            });
+        }
+    }
+
+    function showNowPlayingNotification(song) {
+        if (window.electronAPI) {
+            window.electronAPI.showNotification({
+                title: 'Now Playing',
+                body: `${song.title || 'Unknown Song'} - ${song.artist || 'Unknown Artist'}`
+            });
+        } else if (Notification.permission === 'granted') {
+            new Notification('Now Playing', {
+                body: `${song.title || 'Unknown Song'} - ${song.artist || 'Unknown Artist'}`,
+                icon: song.imageUrl || defaultImageUrl
+            });
+        } else if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification('Now Playing', {
+                        body: `${song.title || 'Unknown Song'} - ${song.artist || 'Unknown Artist'}`,
+                        icon: song.imageUrl || defaultImageUrl
+                    });
+                }
+            });
+        }
     }
 
     function resetPlayer() {
@@ -154,6 +224,19 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar.style.width = '0%';
         currentTimeEl.textContent = '0:00';
         durationEl.textContent = '0:00';
+        
+        if (window.electronAPI) {
+            window.electronAPI.setProgressBar(-1); // Reset progress bar
+            window.electronAPI.updateTrayMenu({
+                isPlaying: false,
+                title: 'No song playing',
+                artist: ''
+            });
+        }
+        
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = null;
+        }
     }
 
     // Save songs to storage
@@ -172,7 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle file upload with image prompt
     async function handleFileUpload() {
         try {
-            // 1. Select audio file
             const audioResult = window.electronAPI
                 ? await window.electronAPI.showOpenDialog({
                     properties: ['openFile', 'multiSelections'],
@@ -194,9 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!window.electronAPI) {
                     // For browser, we don't prompt for image immediately in this simplified version
-                    // You might want to add a separate way to set album art in the browser
                 } else {
-                    // 2. Prompt for image file (Electron specific)
                     const imageResult = await window.electronAPI.showOpenDialog({
                         properties: ['openFile'],
                         filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif'] }],
@@ -208,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // 3. Add new song
                 songs.push({
                     title: path.parse(audioFilename).name,
                     artist: 'Unknown Artist',
@@ -236,12 +315,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Player controls
     function playSong() {
-        if (songs.length === 0 || !audioPlayer.src) return; // Ensure a song is loaded
+        if (songs.length === 0 || !audioPlayer.src) return;
         audioPlayer.play()
             .then(() => {
                 isPlaying = true;
                 playBtn.textContent = 'pause';
                 albumArt.classList.add('rotate');
+                
+                // Update system tray and media session
+                if (window.electronAPI) {
+                    window.electronAPI.updateTrayMenu({
+                        isPlaying: true,
+                        title: songs[currentSongIndex]?.title || 'Unknown Song',
+                        artist: songs[currentSongIndex]?.artist || 'Unknown Artist'
+                    });
+                }
+                
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'playing';
+                }
             })
             .catch(e => console.error('Playback failed:', e));
     }
@@ -251,13 +343,26 @@ document.addEventListener('DOMContentLoaded', () => {
         playBtn.textContent = 'play_arrow';
         albumArt.classList.remove('rotate');
         audioPlayer.pause();
+        
+        // Update system tray and media session
+        if (window.electronAPI) {
+            window.electronAPI.updateTrayMenu({
+                isPlaying: false,
+                title: songs[currentSongIndex]?.title || 'Unknown Song',
+                artist: songs[currentSongIndex]?.artist || 'Unknown Artist'
+            });
+        }
+        
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'paused';
+        }
     }
 
     function prevSong() {
         if (songs.length === 0) return;
         currentSongIndex = currentSongIndex > 0 ? currentSongIndex - 1 : songs.length - 1;
         loadSong(currentSongIndex);
-        playSong(); // Autoplay after loading previous
+        playSong();
     }
 
     function nextSong() {
@@ -271,14 +376,20 @@ document.addEventListener('DOMContentLoaded', () => {
             })()
             : (currentSongIndex + 1) % songs.length;
         loadSong(currentSongIndex);
-        playSong(); // Autoplay after loading next
+        playSong();
     }
 
     // Progress and volume
     function updateProgress() {
         if (!isNaN(audioPlayer.duration)) {
-            progressBar.style.width = `${(audioPlayer.currentTime / audioPlayer.duration) * 100}%`;
+            const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            progressBar.style.width = `${progress}%`;
             currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+            
+            // Update taskbar progress (Electron)
+            if (window.electronAPI) {
+                window.electronAPI.setProgressBar(audioPlayer.currentTime / audioPlayer.duration);
+            }
         }
     }
 
@@ -289,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setVolume(e) {
-        if (!volumeBar) return; // Prevent errors if volumeBar is not found
+        if (!volumeBar) return;
         const volume = Math.min(1, Math.max(0, e.offsetX / volumeBar.clientWidth));
         audioPlayer.volume = volume;
         if (volumeProgress) {
@@ -321,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderPlaylist() {
-        if (!playlistItems) return; // Prevent errors if playlistItems is not found
+        if (!playlistItems) return;
         playlistItems.innerHTML = '';
 
         if (songs.length === 0) {
@@ -337,12 +448,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
 
-                // Highlight currently playing song
                 if (index === currentSongIndex) {
                     li.classList.add('playing');
                 }
 
-                // Click to play song
                 li.addEventListener('click', () => {
                     currentSongIndex = index;
                     loadSong(currentSongIndex);
@@ -384,9 +493,73 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.progress-area') && document.querySelector('.progress-area').addEventListener('click', setProgress);
 
     // Theme toggle event listener
-    const themeToggleBtn = document.querySelector('.theme-toggle');
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', toggleTheme);
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        
+        switch (e.key) {
+            case ' ':
+                e.preventDefault();
+                isPlaying ? pauseSong() : playSong();
+                break;
+            case 'ArrowLeft':
+                if (e.ctrlKey) {
+                    audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 5);
+                } else {
+                    prevSong();
+                }
+                break;
+            case 'ArrowRight':
+                if (e.ctrlKey) {
+                    audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 5);
+                } else {
+                    nextSong();
+                }
+                break;
+            case 'm':
+                toggleMute();
+                break;
+            case 'l':
+                isRepeat = !isRepeat;
+                repeatBtn.style.color = isRepeat ? 'var(--primary)' : 'var(--text)';
+                audioPlayer.loop = isRepeat;
+                break;
+            case 's':
+                isShuffle = !isShuffle;
+                shuffleBtn.style.color = isShuffle ? 'var(--primary)' : 'var(--text)';
+                break;
+            case 'Escape':
+                playlist.classList.remove('show');
+                break;
+        }
+    });
+
+    // Window resize handling
+    window.addEventListener('resize', () => {
+        const isMobile = window.innerWidth < 600;
+        wrapper.classList.toggle('mobile-view', isMobile);
+    });
+
+    // Electron-specific media key support
+    if (window.electronAPI) {
+        window.electronAPI.onMediaCommand((command) => {
+            switch (command) {
+                case 'play':
+                    playSong();
+                    break;
+                case 'pause':
+                    pauseSong();
+                    break;
+                case 'next':
+                    nextSong();
+                    break;
+                case 'previous':
+                    prevSong();
+                    break;
+            }
+        });
     }
 
     // Initialize
