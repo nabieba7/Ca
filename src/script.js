@@ -83,16 +83,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update media metadata
     function updateMediaMetadata() {
         if ('mediaSession' in navigator && songs[currentSongIndex]) {
-            const song = songs[currentSongIndex];
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: song.title || 'Unknown Song',
-                artist: song.artist || 'Unknown Artist',
-                artwork: [
-                    { src: song.imageUrl || defaultImageUrl, sizes: '300x300', type: 'image/png' }
-                ]
+          const song = songs[currentSongIndex];
+          const artwork = [];
+          
+          // Only add artwork if it's a valid URL
+          if (song.imageUrl && 
+              (song.imageUrl.startsWith('http') || 
+               song.imageUrl.startsWith('data:') || 
+               song.imageUrl.startsWith('blob:'))) {
+            artwork.push({ 
+              src: song.imageUrl, 
+              sizes: '300x300', 
+              type: 'image/jpeg' 
             });
+          }
+          
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: song.title || 'Unknown Song',
+            artist: song.artist || 'Unknown Artist',
+            artwork: artwork.length > 0 ? artwork : [
+              { src: defaultImageUrl, sizes: '300x300', type: 'image/jpeg' }
+            ]
+          });
         }
-    }
+      }
 
     // Local Storage for Browser
     function loadSongsFromStorage() {
@@ -138,6 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (songs.length === 0 || index < 0 || index >= songs.length) {
             resetPlayer();
             return;
+
+            
         }
 
         currentSongIndex = index;
@@ -176,42 +192,42 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Update notifications and metadata
-        updateMediaMetadata();
-        showNowPlayingNotification(song);
-        
-        // Update system tray (Electron)
-        if (window.electronAPI) {
-            window.electronAPI.updateTrayMenu({
-                isPlaying,
-                title: song.title || 'Unknown Song',
-                artist: song.artist || 'Unknown Artist'
-            });
-        }
-    }
-
+   // Show notification when track changes - MOVED TO AFTER ALL INITIALIZATION
+   showNowPlayingNotification(song);
+    
+   // Update system tray (Electron)
+   if (window.electronAPI) {
+       window.electronAPI.updateTrayMenu({
+           isPlaying,
+           title: song.title || 'Unknown Song',
+           artist: song.artist || 'Unknown Artist'
+       });
+   }
+   
+   // Update media session metadata
+   updateMediaMetadata();
+}
     function showNowPlayingNotification(song) {
+        const title = 'Now Playing'
+        const body = `${song.title || 'Unknown Song'} - ${song.artist || 'Unknown Artist'}`
+      
         if (window.electronAPI) {
-            window.electronAPI.showNotification({
-                title: 'Now Playing',
-                body: `${song.title || 'Unknown Song'} - ${song.artist || 'Unknown Artist'}`
-            });
-        } else if (Notification.permission === 'granted') {
-            new Notification('Now Playing', {
-                body: `${song.title || 'Unknown Song'} - ${song.artist || 'Unknown Artist'}`,
-                icon: song.imageUrl || defaultImageUrl
-            });
-        } else if (Notification.permission !== 'denied') {
+          // Use Electron's notification system
+          window.electronAPI.showNotification(title, body)
+            .catch(err => console.error('Notification failed:', err))
+        } else {
+          // Fallback to web notifications
+          if (Notification.permission === 'granted') {
+            new Notification(title, { body })
+          } else if (Notification.permission !== 'denied') {
             Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    new Notification('Now Playing', {
-                        body: `${song.title || 'Unknown Song'} - ${song.artist || 'Unknown Artist'}`,
-                        icon: song.imageUrl || defaultImageUrl
-                    });
-                }
-            });
+              if (permission === 'granted') {
+                new Notification(title, { body })
+              }
+            })
+          }
         }
-    }
+      }
 
     function resetPlayer() {
         audioPlayer.src = '';
@@ -430,6 +446,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs < 10 ? '0' + secs : secs}`;
     }
+    function onTrackChange(newTrack) {
+        const title = 'Track Changed'
+        const body = `${newTrack.title} - ${newTrack.artist || 'Unknown Artist'}`
+      
+        if (window.electronAPI) {
+          window.electronAPI.showNotification(title, body)
+            .catch(err => console.error('Track change notification failed:', err))
+        } else {
+          // Web notification fallback
+          if (Notification.permission === 'granted') {
+            new Notification(title, { body })
+          }
+        }
+      }
 
     function renderPlaylist() {
         if (!playlistItems) return;

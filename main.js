@@ -20,9 +20,19 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      enableRemoteModule: false
+      enableRemoteModule: false,
+      sondbox: true
     }
   })
+
+
+  win.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'notifications') {
+      callback(true) // Always grant notification permission
+    } else {
+      callback(false)
+    }
+  }) 
 
   win.loadFile('src/index.html')
   return win
@@ -85,6 +95,79 @@ function setupIPC() {
     } catch (err) {
       console.error('Error saving songs:', err)
       return false
+    }
+  })
+
+  ipcMain.handle('send-notification', (_, { title, body }) => {
+    const { Notification } = require('electron')
+    const notification = new Notification({ 
+      title,
+      body,
+      silent: false
+    })
+    
+    notification.onclick = () => {
+      const win = BrowserWindow.getFocusedWindow()
+      if (win) {
+        if (win.isMinimized()) win.restore()
+        win.focus()
+      }
+    }
+    
+    notification.show()
+    return true
+  })
+
+
+  ipcMain.handle('show-notification', (_, { title, body }) => {
+    const { Notification } = require('electron')
+    
+    const notification = new Notification({
+      title,
+      body,
+      silent: false,  // Make sure it makes a sound
+      urgency: 'normal'  // Linux-specific: can be 'low', 'normal', or 'critical'
+    })
+  
+    notification.onclick = () => {
+      // Focus the window when notification is clicked
+      const windows = BrowserWindow.getAllWindows()
+      if (windows.length > 0) {
+        const win = windows[0]
+        if (win.isMinimized()) win.restore()
+        win.focus()
+      }
+    }
+  
+    notification.show()
+    return true
+  })
+    
+    
+
+
+
+  ipcMain.handle('set-progress-bar', (_, progress) => {
+    const win = BrowserWindow.getFocusedWindow()
+    if (win) {
+      if (progress < 0) {
+        win.setProgressBar(-1) // Remove progress bar
+      } else {
+        win.setProgressBar(progress)
+      }
+    }
+  })
+  
+  ipcMain.handle('update-tray-menu', (_, data) => {
+    // You'll need to implement your tray menu logic here
+    console.log('Update tray menu:', data)
+  })
+  
+  ipcMain.on('media-command', (event, command) => {
+    // Forward media commands to renderer
+    const win = BrowserWindow.getFocusedWindow()
+    if (win) {
+      win.webContents.send('media-command', command)
     }
   })
 
