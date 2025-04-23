@@ -24,6 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const volumeProgress = document.getElementById('volume-progress');
     const volumeBar = document.querySelector('.volume-bar');
     const themeToggle = document.querySelector('.theme-toggle');
+    const waveformCanvas = document.getElementById('waveformCanvas');
+    const spectrumCanvas = document.getElementById('spectrumCanvas');
+
+    // Audio context and analyzer
+    let audioContext, analyser, dataArray;
 
     // Player state
     let currentSongIndex = 0;
@@ -50,6 +55,87 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         join: (...args) => args.join('/')
     };
+
+    // Initialize audio context and analyzer
+    function initAudioContext() {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        
+        // Connect your audio source to the analyser
+        const source = audioContext.createMediaElementSource(audioPlayer);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+    }
+
+    // Visualization functions
+    function drawWaveform() {
+        if (!analyser) return;
+        
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteTimeDomainData(dataArray);
+        
+        const ctx = waveformCanvas.getContext('2d');
+        ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+        
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'var(--primary)';
+        ctx.beginPath();
+        
+        const sliceWidth = waveformCanvas.width * 1.0 / bufferLength;
+        let x = 0;
+        
+        for(let i = 0; i < bufferLength; i++) {
+            const v = dataArray[i] / 128.0;
+            const y = v * waveformCanvas.height / 2;
+            
+            if(i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+            
+            x += sliceWidth;
+        }
+        
+        ctx.lineTo(waveformCanvas.width, waveformCanvas.height/2);
+        ctx.stroke();
+        
+        requestAnimationFrame(drawWaveform);
+    }
+
+    function drawSpectrum() {
+        if (!analyser) return;
+        
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+        
+        const ctx = spectrumCanvas.getContext('2d');
+        ctx.clearRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+        
+        const barWidth = (spectrumCanvas.width / bufferLength) * 2.5;
+        let x = 0;
+        
+        for(let i = 0; i < bufferLength; i++) {
+            const barHeight = (dataArray[i] / 255) * spectrumCanvas.height;
+            
+            // Create a gradient effect
+            const gradient = ctx.createLinearGradient(0, spectrumCanvas.height - barHeight, 0, spectrumCanvas.height);
+            gradient.addColorStop(0, 'var(--primary)');
+            gradient.addColorStop(1, 'var(--secondary)');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x, spectrumCanvas.height - barHeight, barWidth, barHeight);
+            
+            x += barWidth + 1;
+        }
+        
+        requestAnimationFrame(drawSpectrum);
+    }
 
     // Initialize player
     async function initPlayer() {
@@ -83,30 +169,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update media metadata
     function updateMediaMetadata() {
         if ('mediaSession' in navigator && songs[currentSongIndex]) {
-          const song = songs[currentSongIndex];
-          const artwork = [];
-          
-          // Only add artwork if it's a valid URL
-          if (song.imageUrl && 
-              (song.imageUrl.startsWith('http') || 
-               song.imageUrl.startsWith('data:') || 
-               song.imageUrl.startsWith('blob:'))) {
-            artwork.push({ 
-              src: song.imageUrl, 
-              sizes: '300x300', 
-              type: 'image/jpeg' 
+            const song = songs[currentSongIndex];
+            const artwork = [];
+            
+            if (song.imageUrl && 
+                (song.imageUrl.startsWith('http') || 
+                 song.imageUrl.startsWith('data:') || 
+                 song.imageUrl.startsWith('blob:'))) {
+                artwork.push({ 
+                    src: song.imageUrl, 
+                    sizes: '300x300', 
+                    type: 'image/jpeg' 
+                });
+            }
+            
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title || 'Unknown Song',
+                artist: song.artist || 'Unknown Artist',
+                artwork: artwork.length > 0 ? artwork : [
+                    { src: defaultImageUrl, sizes: '300x300', type: 'image/jpeg' }
+                ]
             });
-          }
-          
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: song.title || 'Unknown Song',
-            artist: song.artist || 'Unknown Artist',
-            artwork: artwork.length > 0 ? artwork : [
-              { src: defaultImageUrl, sizes: '300x300', type: 'image/jpeg' }
-            ]
-          });
         }
-      }
+    }
 
     // Local Storage for Browser
     function loadSongsFromStorage() {
@@ -152,8 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (songs.length === 0 || index < 0 || index >= songs.length) {
             resetPlayer();
             return;
-
-            
         }
 
         currentSongIndex = index;
@@ -192,42 +275,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-   // Show notification when track changes - MOVED TO AFTER ALL INITIALIZATION
-   showNowPlayingNotification(song);
-    
-   // Update system tray (Electron)
-   if (window.electronAPI) {
-       window.electronAPI.updateTrayMenu({
-           isPlaying,
-           title: song.title || 'Unknown Song',
-           artist: song.artist || 'Unknown Artist'
-       });
-   }
-   
-   // Update media session metadata
-   updateMediaMetadata();
-}
+        // Show notification when track changes
+        showNowPlayingNotification(song);
+        
+        // Update system tray (Electron)
+        if (window.electronAPI) {
+            window.electronAPI.updateTrayMenu({
+                isPlaying,
+                title: song.title || 'Unknown Song',
+                artist: song.artist || 'Unknown Artist'
+            });
+        }
+        
+        // Update media session metadata
+        updateMediaMetadata();
+    }
+
     function showNowPlayingNotification(song) {
         const title = 'Now Playing'
         const body = `${song.title || 'Unknown Song'} - ${song.artist || 'Unknown Artist'}`
       
         if (window.electronAPI) {
-          // Use Electron's notification system
-          window.electronAPI.showNotification(title, body)
-            .catch(err => console.error('Notification failed:', err))
+            // Use Electron's notification system
+            window.electronAPI.showNotification(title, body)
+                .catch(err => console.error('Notification failed:', err))
         } else {
-          // Fallback to web notifications
-          if (Notification.permission === 'granted') {
-            new Notification(title, { body })
-          } else if (Notification.permission !== 'denied') {
-            Notification.requestPermission().then(permission => {
-              if (permission === 'granted') {
+            // Fallback to web notifications
+            if (Notification.permission === 'granted') {
                 new Notification(title, { body })
-              }
-            })
-          }
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification(title, { body })
+                    }
+                })
+            }
         }
-      }
+    }
 
     function resetPlayer() {
         audioPlayer.src = '';
@@ -332,6 +416,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Player controls
     function playSong() {
         if (songs.length === 0 || !audioPlayer.src) return;
+        
+        // Initialize audio context on first play (required by browsers)
+        if (!audioContext) {
+            initAudioContext();
+            drawWaveform();
+            drawSpectrum();
+        }
+        
         audioPlayer.play()
             .then(() => {
                 isPlaying = true;
@@ -351,7 +443,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     navigator.mediaSession.playbackState = 'playing';
                 }
             })
-            .catch(e => console.error('Playback failed:', e));
+            .catch(e => {
+                console.error('Playback failed:', e);
+                // Try resuming audio context if it was suspended
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => playSong());
+                }
+            });
     }
 
     function pauseSong() {
@@ -446,20 +544,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs < 10 ? '0' + secs : secs}`;
     }
+
     function onTrackChange(newTrack) {
         const title = 'Track Changed'
         const body = `${newTrack.title} - ${newTrack.artist || 'Unknown Artist'}`
       
         if (window.electronAPI) {
-          window.electronAPI.showNotification(title, body)
-            .catch(err => console.error('Track change notification failed:', err))
+            window.electronAPI.showNotification(title, body)
+                .catch(err => console.error('Track change notification failed:', err))
         } else {
-          // Web notification fallback
-          if (Notification.permission === 'granted') {
-            new Notification(title, { body })
-          }
+            // Web notification fallback
+            if (Notification.permission === 'granted') {
+                new Notification(title, { body })
+            }
         }
-      }
+    }
 
     function renderPlaylist() {
         if (!playlistItems) return;
@@ -570,6 +669,16 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', () => {
         const isMobile = window.innerWidth < 600;
         wrapper.classList.toggle('mobile-view', isMobile);
+        
+        // Update canvas sizes
+        if (waveformCanvas) {
+            waveformCanvas.width = waveformCanvas.clientWidth;
+            waveformCanvas.height = 100;
+        }
+        if (spectrumCanvas) {
+            spectrumCanvas.width = spectrumCanvas.clientWidth;
+            spectrumCanvas.height = 100;
+        }
     });
 
     // Electron-specific media key support
@@ -598,5 +707,16 @@ document.addEventListener('DOMContentLoaded', () => {
         volumeProgress.style.width = '70%';
     }
     updateVolumeIcon(0.7);
+    
+    // Initialize canvas sizes
+    if (waveformCanvas) {
+        waveformCanvas.width = waveformCanvas.clientWidth;
+        waveformCanvas.height = 100;
+    }
+    if (spectrumCanvas) {
+        spectrumCanvas.width = spectrumCanvas.clientWidth;
+        spectrumCanvas.height = 100;
+    }
+    
     initPlayer();
 });
