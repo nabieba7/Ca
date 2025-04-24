@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dataArray = new Uint8Array(bufferLength);
         analyser.getByteFrequencyData(dataArray);
         
-        const ctx = spectrumCanvas.getContext('2d');
+       
         ctx.clearRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
         
         const barWidth = (spectrumCanvas.width / bufferLength) * 2.5;
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!audioContext) {
             initAudioContext();
             drawWaveform();
-            drawSpectrum();
+            
         }
         
         audioPlayer.play()
@@ -693,10 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
             waveformCanvas.width = waveformCanvas.clientWidth;
             waveformCanvas.height = 100;
         }
-        if (spectrumCanvas) {
-            spectrumCanvas.width = spectrumCanvas.clientWidth;
-            spectrumCanvas.height = 100;
-        }
+        
     });
 
     // Electron-specific media key support
@@ -731,10 +728,7 @@ document.addEventListener('DOMContentLoaded', () => {
         waveformCanvas.width = waveformCanvas.clientWidth;
         waveformCanvas.height = 100;
     }
-    if (spectrumCanvas) {
-        spectrumCanvas.width = spectrumCanvas.clientWidth;
-        spectrumCanvas.height = 100;
-    }
+    
     
     initPlayer();
 });
