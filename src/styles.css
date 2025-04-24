@@ -15,6 +15,13 @@
   --success: #00c851;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
 .dark-theme {
   --primary: #88c070;
   --secondary: #a3d9a5;
@@ -27,65 +34,108 @@
   ;
 }
 
-/* Base Styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
+
 
 body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: #000;
+  color: #fff;
+  font-family: 'Kamerik-3D', sans-serif;
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-  transition: all 0.3s ease;
-  background-image: url(./assets/img/layer-1.jpg);
-  background-size: cover;
-  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
 }
 
 /* Background Layers */
-.layers__item {
+.parallax-container {
   position: fixed;
-  inset: 0;
+  width: 100%;
+  height: 100vh;
+  min-height: 500px;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--move-y)) rotateY(var(--move-x));
+  will-change: transform;
+  transition: transform var(--transition);
+  perspective: 1000px;
+}
+
+.parallax-layer {
+  position: absolute;
+  inset: -5vw;
   background-size: cover;
   background-position: center;
-  will-change: transform;
-  z-index: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.layer-1 {
+  background-image: url(./assets/img/layer-1.jpg);
+  transform: translateZ(-100px) scale(2);
+  z-index: 1;
 }
 
 .layer-2 {
-  transform: translateZ(80px) scale(0.88);
-  background-image: url('./assets/img/layer-2.jpg');
-  opacity: 0.8;
+  background-image: url(./assets/img/layer-2.png);
+  transform: translateZ(-50px) scale(1.5);
+  z-index: 2;
 }
 
 .layer-4 {
-  transform: translateZ(300px) scale(0.7);
+  position: absolute;
+  inset: -5vw;
+  z-index: 3;
+  pointer-events: none; /* Allows clicks to pass through to player */
 }
 
 .layer-4 canvas.rain {
   position: absolute;
   width: 100%;
   height: 100%;
+  opacity: 0.3; /* Make rain slightly transparent */
+}
+
+.layer-5 {
+  background-image: url(./assets/img/layer-5.png);
+  transform: translateZ(0px);
+  z-index: 4;
+  opacity: 0.7;
+}
+
+.layer-6 {
+  background-image: url(./assets/img/layer-6.png);
+  transform: translateZ(50px) scale(0.9);
+  z-index: 5;
+  opacity: 0.5;
 }
 
 /* Main Player Container */
 .wrapper {
   width: 380px;
   border-radius: 15px;
-  background: rgba(45, 85, 55, 0.5);
+  background: rgba(45, 85, 55, 0.2);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   padding: 25px 30px;
-  box-shadow: 0 6px 15px var(--shadow);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   position: relative;
+  z-index: 10;
+  margin: auto;
   overflow: hidden;
   transition: all 0.3s ease;
+  transform: translateZ(100px); /* Makes player appear above background layers */
+}
+
+/* Ensure variables are defined */
+:root {
+  --move-y: 0deg;
+  --move-x: 0deg;
+  --transition: 0.05s;
+  --shadow: rgba(0, 0, 0, 0.3);
 }
 
 /* Theme Toggle */

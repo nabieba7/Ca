@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const volumeBar = document.querySelector('.volume-bar');
     const themeToggle = document.querySelector('.theme-toggle');
     const waveformCanvas = document.getElementById('waveformCanvas');
-    const spectrumCanvas = document.getElementById('spectrumCanvas');
+    
+    
 
     // Audio context and analyzer
     let audioContext, analyser, dataArray;
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 2048;
         
-        // Connect your audio source to the analyser
+        // Connect audio source to the analyser
         const source = audioContext.createMediaElementSource(audioPlayer);
         source.connect(analyser);
         analyser.connect(audioContext.destination);
@@ -375,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let imageUrl = defaultImageUrl;
 
                 if (!window.electronAPI) {
-                    // For browser, we don't prompt for image immediately in this simplified version
+                    // For browser,  don't prompt for image immediately in this simplified version
                 } else {
                     const imageResult = await window.electronAPI.showOpenDialog({
                         properties: ['openFile'],
@@ -545,6 +546,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${mins}:${secs < 10 ? '0' + secs : secs}`;
     }
 
+    /**
+     * Handles the event of a track change by displaying a notification.
+     *
+     * @param {Object} newTrack - The new track information.
+     * @param {string} newTrack.title - The title of the new track.
+     * @param {string} [newTrack.artist] - The artist of the new track. Defaults to 'Unknown Artist' if not provided.
+     */
     function onTrackChange(newTrack) {
         const title = 'Track Changed'
         const body = `${newTrack.title} - ${newTrack.artist || 'Unknown Artist'}`
@@ -664,6 +672,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
         }
     });
+
+    document.addEventListener('mousemove', e => {
+        Object.assign(document.documentElement, {
+            style: `
+            --move-x: ${(e.clientX - window.innerWidth / 2) * -.005}deg;
+            --move-y: ${(e.clientY - window.innerHeight / 2) * .01}deg;
+            `
+        })
+    })
+    
 
     // Window resize handling
     window.addEventListener('resize', () => {

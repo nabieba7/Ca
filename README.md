@@ -14,6 +14,7 @@ A beautiful music player with playlist management built with Electron.
 - 🔉 Volume control
 - 🔀 Shuffle and repeat modes
 - 🖥️ Works offline – pure desktop app
+- Cross-platform support (Electron + Web)
 
 ## Installation
 
@@ -30,7 +31,34 @@ A beautiful music player with playlist management built with Electron.
 
 
 # How to run 
-cd parallax-music-player
-npm install
+### Electron Version
+1. Clone this repository
+2. Install dependencies:
+   ```bash
+   npm install
 npm start
 
+#### B. User Manual
+```markdown
+# Music Player User Guide
+
+## Basic Controls
+- Play/Pause: Spacebar or Play button
+- Previous/Next: Arrow keys or buttons
+- Volume: Click volume bar or use mouse wheel
+- Mute: 'M' key or volume icon
+
+### Keyboard Shortcuts
+| Key | Action |
+|-----|--------|
+| Space | Play/Pause |
+| ← → | Previous/Next |
+| Ctrl+← → | Seek backward/forward |
+| M | Mute |
+| L | Toggle repeat |
+| S | Toggle shuffle |
+
+### Playlist Management
+- Drag and drop audio files to add to playlist
+- Right-click songs to remove
+- Double-click to play immediately

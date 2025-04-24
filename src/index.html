@@ -4,18 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Advanced Music Player</title>
-
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="./styles.css">
   <script src="./libs/rain.js" defer></script>
 </head>
 <body>
-  <div class="layers__item layer-2"></div>
-  <div class="layers__item layer-4">
-    <canvas class="rain"></canvas>
+  <div class="parallax-container">
+    <div class="parallax-layer layer-1" style="background-image: url(./assets/img/layer-1.jpg);"></div>
+    <div class="parallax-layer layer-2" style="background-image: url(./assets/img/layer-2.png);"></div>
+    <div class="parallax-layer layer-4">
+      <canvas class="rain"></canvas>
+    </div>
+    <div class="parallax-layer layer-5" style="background-image: url(./assets/img/layer-5.png);"></div>
+    <div class="parallax-layer layer-6" style="background-image: url(./assets/img/layer-6.png);"></div>
   </div>
+  
   <div class="wrapper">
-    
     <!-- Theme toggle button -->
     <div class="theme-toggle">
       <i class="material-icons">brightness_4</i>
@@ -80,7 +84,6 @@
       </ul>
     </div>
     
-
     <!-- Hidden file inputs -->
     <input type="file" id="audio-upload" accept="audio/*" style="display: none;">
     <input type="file" id="image-upload" accept="image/*" style="display: none;">
@@ -88,21 +91,36 @@
     <!-- Audio element -->
     <audio id="audio-player"></audio>
     
-   <div class="notification" id="notification"></div>
+    <div class="notification" id="notification"></div>
+    
+    <!-- Visualizations -->
+    <div class="visualizations">
+      <canvas id="waveformCanvas" width="300" height="100"></canvas>
+    </div>
+  </div>
+
   <script src="./script.js"></script>
   <script>
-    // Save songs before window closes
+    
     window.addEventListener('beforeunload', () => {
       if (window.electronAPI) {
         window.electronAPI.saveSongs();
       }
     });
-  </script>
-  <!-- Add these near your progress bar or album art -->
-  <div class="visualizations">
-    <canvas id="waveformCanvas" width="300" height="100"></canvas>
     
-  </div>
+    // Parallax effect
+    document.addEventListener('mousemove', (e) => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      
+      const container = document.querySelector('.parallax-container');
+      if (container) {
+        container.style.transform = `
+          rotateX(${(y - 0.5) * 5}deg)
+          rotateY(${(x - 0.5) * -5}deg)
+        `;
+      }
+    });
+  </script>
 </body>
-  
 </html>
