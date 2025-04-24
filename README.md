@@ -23,13 +23,6 @@ A beautiful music player with playlist management built with Electron.
 - npm or yarn
 
 
-### Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/nabieba7/Ca.git
-
-
-
 # How to run 
 ### Electron Version
 1. Clone this repository
@@ -38,8 +31,7 @@ A beautiful music player with playlist management built with Electron.
    npm install
 npm start
 
-#### B. User Manual
-```markdown
+
 # Music Player User Guide
 
 ## Basic Controls
