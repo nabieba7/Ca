@@ -356,25 +356,26 @@ body {
 }
 
 /* Playlist */
+
 .music-list {
   position: absolute;
-  left: 0;
-  bottom: -100%;
-  width: 100%;
-  background: var(--card);
-  border-radius: 15px 15px 0 0;
+  right: -100%; /* Start hidden to the right */
+  top: 0;
+  width: 350px; /* Fixed width for sidebar */
+  height: 100%; /* Full height */
+  background: rgba(45, 85, 55, 0.9);
+  border-radius: 0 15px 15px 0; /* Rounded corners on right side */
   padding: 15px 20px;
-  box-shadow: 0 -5px 10px var(--shadow);
+  box-shadow: -5px 0 10px var(--shadow); /* Shadow on the left side */
   transition: all 0.3s ease;
   z-index: 5;
-  max-height: 70vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
 .music-list.show {
-  bottom: 0;
+  right: 0; /* Slide in from right */
 }
 
 .music-list .header {
@@ -403,12 +404,12 @@ body {
 
 .music-list ul::-webkit-scrollbar-track {
   background: var(--progress-bg);
-  border-radius: 3px;
+  border-radius: 15px;
 }
 
 .music-list ul::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 3px;
+  background:  black;
+  border-radius: 15px;
 }
 
 .music-list li {
@@ -431,15 +432,15 @@ body {
 }
 
 .music-list li.playing {
-  color: var(--primary);
-  background: rgba(67, 97, 238, 0.1);
+  color: black;
+  background: rgba(45, 85, 55, 0.9);
   font-weight: 600;
 }
 
 .music-list li .playlist-img {
   width: 40px;
   height: 40px;
-  border-radius: 5px;
+  border-radius: 15px;
   margin-right: 15px;
   object-fit: cover;
 }
@@ -492,22 +493,21 @@ body {
   justify-content: center;
   padding: 10px;
   margin-top: 10px;
-  background: rgba(67, 97, 238, 0.1);
+  background: #ddd;
   color: var(--primary);
-  border-radius: 5px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px dashed var(--primary);
 }
 
 .add-song:hover {
-  background: rgba(67, 97, 238, 0.2);
+  background: blue;
 }
 
 .add-song i {
   margin-right: 8px;
 }
-
 /* Animations */
 @keyframes rotate {
   from { transform: rotate(0deg); }
