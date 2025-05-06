@@ -20,7 +20,7 @@ A beautiful music player with playlist management built with Electron.
 
 ### Prerequisites
 - Node.js (v14 or later)
-- npm or yarn
+- npm 
 
 
 # How to run 
@@ -29,6 +29,7 @@ A beautiful music player with playlist management built with Electron.
 2. Install dependencies:
    ```bash
    npm install
+   npm init
 npm start
 
 
