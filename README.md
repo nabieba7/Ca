@@ -1,6 +1,7 @@
 # Electron Music Player
 
 A beautiful music player with playlist management built with Electron.
+( if app is not working , close the app and reopen it) 
 
 ## Features
 
