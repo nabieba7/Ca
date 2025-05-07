@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Music Player</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./libs/rain.js" defer></script>
+</head>
+<body>
+  <div class="parallax-container">
+    <div class="parallax-layer layer-1" style="background-image: url(./assets/img/layer-1.jpg);"></div>
+    <div class="parallax-layer layer-2" style="background-image: url(./assets/img/layer-2.png);"></div>
+    <div class="parallax-layer layer-4">
+      <canvas class="rain"></canvas>
+    </div>
+    <div class="parallax-layer layer-5" style="background-image: url(./assets/img/layer-5.png);"></div>
+    <div class="parallax-layer layer-6" style="background-image: url(./assets/img/layer-6.png);"></div>
+  </div>
+  
+  <div class="wrapper">
+    <!-- Theme toggle button -->
+    <div class="theme-toggle">
+      <i class="material-icons">brightness_4</i>
+    </div>
+    
+    <div class="top-bar">
+      <i class="material-icons" id="show-list">queue_music</i>
+      <span>Now Playing</span>
+      <i class="material-icons" id="upload-btn">file_upload</i>
+    </div>
+
+    <div class="img-area">
+      <img id="album-art" src="https://source.unsplash.com/random/300x300/?music,album" alt="Album Artwork">
+    </div>
+
+    <div class="song-details">
+      <p class="name" id="song-title">No song selected</p>
+      <p class="artist" id="song-artist">Select a song</p>
+    </div>
+
+    <div class="progress-area">
+      <div class="progress-bar">
+        <span id="progress"></span>
+      </div>
+      <div class="timer">
+        <span class="current-time" id="current-time">0:00</span>
+        <span class="max-duration" id="duration">0:00</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <i id="repeat" class="material-icons" title="Repeat">repeat</i>
+      <i id="prev" class="material-icons" title="Previous">skip_previous</i>
+      <i id="play" class="material-icons" title="Play">play_arrow</i>
+      <i id="next" class="material-icons" title="Next">skip_next</i>
+      <i id="shuffle" class="material-icons" title="Shuffle">shuffle</i>
+    </div>
+    
+    <div class="volume-controls">
+      <i id="mute-btn" class="material-icons" title="Mute">volume_up</i>
+      <div class="volume-bar">
+        <div class="volume-progress" id="volume-progress"></div>
+      </div>
+    </div>
+
+    <!-- Playlist section -->
+    <div class="music-list" id="playlist">
+      <div class="header">
+        <div class="row">
+          <i class="material-icons">queue_music</i>
+          <span>Playlist</span>
+        </div>
+        <i id="close" class="material-icons">close</i>
+      </div>
+
+      <ul id="playlist-items">
+        <!-- Playlist items will be added dynamically -->
+        <li style="justify-content: center; color: var(--text); opacity: 0.7;">No songs in playlist</li>
+        <li class="add-song">
+          <i class="material-icons">add</i> Add Songs
+        </li>
+      </ul>
+    </div>
+    
+    <!-- Hidden file inputs -->
+    <input type="file" id="audio-upload" accept="audio/*" style="display: none;">
+    <input type="file" id="image-upload" accept="image/*" style="display: none;">
+    
+    <!-- Audio element -->
+    <audio id="audio-player"></audio>
+    
+    <div class="notification" id="notification"></div>
+    
+    <!-- Visualizations -->
+    <div class="visualizations">
+      <canvas id="waveformCanvas" width="300" height="100"></canvas>
+    </div>
+  </div>
+
+  <script src="./script.js"></script>
+  <script>
+    
+    window.addEventListener('beforeunload', () => {
+      if (window.electronAPI) {
+        window.electronAPI.saveSongs();
+      }
+    });
+    
+    // Parallax effect
+    document.addEventListener('mousemove', (e) => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      
+      const container = document.querySelector('.parallax-container');
+      if (container) {
+        container.style.transform = `
+          rotateX(${(y - 0.5) * 5}deg)
+          rotateY(${(x - 0.5) * -5}deg)
+        `;
+      }
+    });
+  </script>
+</body>
+</html>
